@@ -160,22 +160,33 @@ func sudoCommand(client *ssh.Client, command string, user string, password strin
 		prefixLen = len(prefix)
 	)
 
-	go func(in io.Writer, output *bytes.Buffer) {
+	abort := make(chan bool)
+
+	go func(in io.Writer, output *bytes.Buffer, done <-chan bool) {
 
 		for {
-			content := string(output.Bytes())
-			if len(content) < prefixLen {
-				continue
-			}
-			if strings.HasPrefix(content, prefix) {
-				_, err = in.Write([]byte(password + "\n"))
-				if err != nil {
+			select {
+			case <-done:
+				return
+			default:
+				content := string(output.Bytes())
+				if len(content) < prefixLen {
+					continue
+				}
+				if strings.HasPrefix(content, prefix) {
+					_, err = in.Write([]byte(password + "\n"))
+					if err == io.EOF {
+						err = nil
+					}
 					break
 				}
-				break
 			}
 		}
-	}(in, &outputBuf)
+	}(in, &outputBuf, abort)
+
+	defer func() {
+		abort <- true
+	}()
 
 	err = session.Run("sudo " + command)
 	if err != nil {
