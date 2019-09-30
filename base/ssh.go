@@ -176,6 +176,7 @@ func sudoCommand(client *ssh.Client, command string, user string, password strin
 				if strings.HasPrefix(content, prefix) {
 					_, err = in.Write([]byte(password + "\n"))
 					if err == io.EOF {
+						log.Debug(err)
 						err = nil
 					}
 					break
