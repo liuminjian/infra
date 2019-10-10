@@ -6,9 +6,9 @@ type Host struct {
 	Port     int      `json:"port"`
 	User     string   `json:"user"`
 	Password string   `json:"password"`
-	KeyFile  string   `json:"key_file"`
+	KeyFile  string   `json:"keyFile"`
 	Platform platform `json:"platform"`
-	AuthType authType `json:"auth_type"`
+	AuthType authType `json:"authType"`
 }
 
 type platform string
