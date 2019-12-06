@@ -1,17 +1,21 @@
 package base
 
 import (
+	"github.com/lestrrat/go-file-rotatelogs"
 	"github.com/mattn/go-colorable"
-	"github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
+	"github.com/rifflock/lfshook"
+	log "github.com/sirupsen/logrus"
 	"github.com/tietang/go-utils"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"time"
 )
 
 var formatter *prefixed.TextFormatter
 
 var lfh *utils.LineNumLogrusHook
 
-func InitLog(debug bool) {
+func InitLog(baseLogPath string, level log.Level, maxAge time.Duration, rotationTime time.Duration) {
 	formatter = &prefixed.TextFormatter{}
 	formatter.ForceColors = true
 	formatter.DisableColors = false
@@ -28,18 +32,38 @@ func InitLog(debug bool) {
 	})
 	formatter.FullTimestamp = true
 	formatter.TimestampFormat = "2006-01-02.15:04:05.000000"
-	logrus.SetFormatter(formatter)
-	logrus.SetOutput(colorable.NewColorableStdout())
-	if debug {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-	logrus.SetReportCaller(true)
+	log.SetFormatter(formatter)
+	log.SetOutput(colorable.NewColorableStdout())
+	log.SetReportCaller(true)
 	SetLineNumLogrusHook()
+	SetRotateLogsHook(baseLogPath, level, maxAge, rotationTime, formatter)
 }
 
 func SetLineNumLogrusHook() {
 	lfh = utils.NewLineNumLogrusHook()
 	lfh.EnableFileNameLog = true
 	lfh.EnableFuncNameLog = true
-	logrus.AddHook(lfh)
+	log.AddHook(lfh)
+}
+
+func SetRotateLogsHook(baseLogPath string, level log.Level, maxAge time.Duration, rotationTime time.Duration,
+	formatter *prefixed.TextFormatter) {
+	writer, err := rotatelogs.New(
+		baseLogPath+".%Y%m%d%H%M",
+		rotatelogs.WithLinkName(baseLogPath),      // 生成软链，指向最新日志文件
+		rotatelogs.WithMaxAge(maxAge),             // 文件最大保存时间
+		rotatelogs.WithRotationTime(rotationTime), // 日志切割时间间隔
+	)
+	if err != nil {
+		log.Errorf("config local file system logger error. %v", errors.WithStack(err))
+	}
+	lfHook := lfshook.NewHook(lfshook.WriterMap{
+		log.DebugLevel: writer, // 为不同级别设置不同的输出目的
+		log.InfoLevel:  writer,
+		log.WarnLevel:  writer,
+		log.ErrorLevel: writer,
+		log.FatalLevel: writer,
+		log.PanicLevel: writer,
+	}, formatter)
+	log.AddHook(lfHook)
 }
