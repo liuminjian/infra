@@ -7,17 +7,17 @@ type Host struct {
 	User     string   `json:"user"`
 	Password string   `json:"password"`
 	KeyFile  string   `json:"keyFile"`
-	Platform platform `json:"platform"`
+	Platform Platform `json:"platform"`
 	AuthType authType `json:"authType"`
 }
 
-type platform string
+type Platform string
 
 const (
-	LinuxPlatform platform = "Linux"
-	AIXPlatform   platform = "AIX"
-	SunOsPlatform platform = "SunOS"
-	HPPlatform    platform = "HP-UX"
+	LinuxPlatform Platform = "Linux"
+	AIXPlatform   Platform = "AIX"
+	SunOsPlatform Platform = "SunOS"
+	HPPlatform    Platform = "HP-UX"
 )
 
 type authType string
