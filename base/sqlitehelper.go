@@ -10,11 +10,12 @@ type SqliteDB struct {
 	db *gorm.DB
 }
 
-func NewSqliteDB(dbPath string, debug bool) *SqliteDB {
+func NewSqliteDB(dbPath string, debug bool) (*SqliteDB, error) {
 
 	db, err := gorm.Open("sqlite3", dbPath)
 	if err != nil {
-		log.Fatal("new gorm err", err)
+		log.Error("new gorm err", err)
+		return nil, err
 	}
 
 	db.LogMode(debug)
@@ -23,5 +24,5 @@ func NewSqliteDB(dbPath string, debug bool) *SqliteDB {
 		return "t_" + defaultTableName
 	}
 
-	return &SqliteDB{db: db}
+	return &SqliteDB{db: db}, nil
 }
