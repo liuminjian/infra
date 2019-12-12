@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/go-playground/validator.v9"
 	vtzh "gopkg.in/go-playground/validator.v9/translations/zh"
+	"os"
 	"strings"
 	"sync"
 )
@@ -43,7 +44,38 @@ func NewValidator() *validator.Validate {
 	} else {
 		log.Error("Not found translator: zh")
 	}
+
+	//注册自定义校验
+	_ = validate.RegisterValidation("path", func(fl validator.FieldLevel) bool {
+		// 检查配置文件位置
+		_, err := os.Stat(fl.Field().String())
+		if err != nil {
+			return false
+		} else {
+			return true
+		}
+	})
+
+	RegisterTagTranslation("path", map[string]string{
+		"zh": "{0}不是一个有效路径或无权限访问。",
+	})
+
 	return validate
+}
+
+// 自定义翻译
+func RegisterTagTranslation(tag string, messages map[string]string) {
+	for _, message := range messages {
+		_ = validate.RegisterTranslation(tag, translator, func(ut ut.Translator) error {
+			return ut.Add(tag, message, false)
+		}, func(ut ut.Translator, fe validator.FieldError) string {
+			t, err := ut.T(fe.Tag(), fe.Field())
+			if err != nil {
+				return fe.(error).Error()
+			}
+			return t
+		})
+	}
 }
 
 func ValidateStruct(v interface{}) error {

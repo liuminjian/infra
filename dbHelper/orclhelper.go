@@ -1,4 +1,4 @@
-package base
+package dbHelper
 
 import (
 	"database/sql"
@@ -8,7 +8,7 @@ import (
 )
 
 type OrclDB struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 func NewOrclDB(openString string) (*OrclDB, error) {
@@ -20,7 +20,7 @@ func NewOrclDB(openString string) (*OrclDB, error) {
 	}
 
 	return &OrclDB{
-		db: db,
+		DB: db,
 	}, nil
 }
 
@@ -29,11 +29,11 @@ func GetDSN(user string, password string, ip string, port int, serviceName strin
 }
 
 func (o *OrclDB) Close() {
-	o.db.Close()
+	o.DB.Close()
 }
 
 func (o *OrclDB) FetchAll(query string, args ...interface{}) ([][]interface{}, error) {
-	tx, err := o.db.Begin()
+	tx, err := o.DB.Begin()
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (o *OrclDB) ExecTx(tx *sql.Tx, query string, args ...interface{}) (sql.Resu
 }
 
 func (o *OrclDB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	tx, err := o.db.Begin()
+	tx, err := o.DB.Begin()
 	if err != nil {
 		return nil, err
 	}

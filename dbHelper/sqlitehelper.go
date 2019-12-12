@@ -1,4 +1,4 @@
-package base
+package dbHelper
 
 import (
 	"github.com/jinzhu/gorm"
@@ -7,7 +7,7 @@ import (
 )
 
 type SqliteDB struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 func NewSqliteDB(dbPath string, debug bool) (*SqliteDB, error) {
@@ -24,5 +24,5 @@ func NewSqliteDB(dbPath string, debug bool) (*SqliteDB, error) {
 		return "t_" + defaultTableName
 	}
 
-	return &SqliteDB{db: db}, nil
+	return &SqliteDB{DB: db}, nil
 }
