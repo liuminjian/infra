@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -16,17 +17,11 @@ import (
 
 func NewSSHClient(h *Host) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
-		User:            h.User,
-		HostKeyCallback: hostKeyCallBackFunc(h.Ip),
-		Timeout:         time.Second * 5,
-		HostKeyAlgorithms: []string{
-			ssh.KeyAlgoRSA,
-			ssh.KeyAlgoDSA,
-			ssh.KeyAlgoECDSA256,
-			ssh.KeyAlgoECDSA384,
-			ssh.KeyAlgoECDSA521,
-			ssh.KeyAlgoED25519,
+		User: h.User,
+		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
+			return nil
 		},
+		Timeout: time.Second * 5,
 	}
 
 	if h.AuthType == PasswordAuth {
