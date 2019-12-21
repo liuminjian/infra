@@ -8,6 +8,10 @@ import (
 
 type JSON []byte
 
+func (j JSON) String() string {
+	return string(j)
+}
+
 func (j JSON) Value() (driver.Value, error) {
 	if j.IsNull() {
 		return nil, nil

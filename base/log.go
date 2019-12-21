@@ -35,8 +35,9 @@ func InitLog(baseLogPath string, level log.Level, maxAge time.Duration, rotation
 	log.SetFormatter(formatter)
 	log.SetOutput(colorable.NewColorableStdout())
 	log.SetReportCaller(true)
+	log.SetLevel(level)
 	SetLineNumLogrusHook()
-	SetRotateLogsHook(baseLogPath, level, maxAge, rotationTime, formatter)
+	SetRotateLogsHook(baseLogPath, maxAge, rotationTime, formatter)
 }
 
 func SetLineNumLogrusHook() {
@@ -46,7 +47,7 @@ func SetLineNumLogrusHook() {
 	log.AddHook(lfh)
 }
 
-func SetRotateLogsHook(baseLogPath string, level log.Level, maxAge time.Duration, rotationTime time.Duration,
+func SetRotateLogsHook(baseLogPath string, maxAge time.Duration, rotationTime time.Duration,
 	formatter *prefixed.TextFormatter) {
 	writer, err := rotatelogs.New(
 		baseLogPath+".%Y%m%d%H%M",
@@ -66,4 +67,23 @@ func SetRotateLogsHook(baseLogPath string, level log.Level, maxAge time.Duration
 		log.PanicLevel: writer,
 	}, formatter)
 	log.AddHook(lfHook)
+}
+
+type GormLogger struct{}
+
+func (*GormLogger) Print(v ...interface{}) {
+	switch v[0] {
+	case "sql":
+		log.WithFields(
+			log.Fields{
+				"module":  "gorm",
+				"type":    "sql",
+				"rows":    v[5],
+				"src_ref": v[1],
+				"values":  v[4],
+			},
+		).Debug(v[3])
+	case "log":
+		log.WithFields(log.Fields{"module": "gorm", "type": "log"}).Print(v[2])
+	}
 }

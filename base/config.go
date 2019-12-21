@@ -9,12 +9,12 @@ import (
 func GetConfig(configFile string, value interface{}) error {
 	yamlFile, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		log.Error("read yaml file fail:%s", err.Error())
+		log.Errorf("read yaml file fail:%s", err.Error())
 		return err
 	}
 	err = yaml.Unmarshal(yamlFile, value)
 	if err != nil {
-		log.Error("Unmarshal yaml file fail:%s", err.Error())
+		log.Errorf("Unmarshal yaml file fail:%s", err.Error())
 		return err
 	}
 

@@ -22,6 +22,7 @@ func NewDBMaster(user string, password string, host string, port int, database s
 	}
 
 	db.LogMode(debug)
+	db.SetLogger(&GormLogger{})
 	// 加表名前缀
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		return "t_" + defaultTableName
