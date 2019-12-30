@@ -3,6 +3,7 @@ package base
 import (
 	"github.com/pkg/sftp"
 	"github.com/prometheus/common/log"
+	"golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
 	"os"
@@ -11,16 +12,16 @@ import (
 
 const maxPacket = 1 << 15
 
-func NewSftpClient(h *Host) (*sftp.Client, error) {
-	conn, err := NewSSHClient(h)
+func NewSftpClient(h *Host, cfg ssh.Config) (*sftp.Client, error) {
+	conn, err := NewSSHClient(h, cfg)
 	if err != nil {
 		return nil, err
 	}
 	return sftp.NewClient(conn, sftp.MaxPacket(maxPacket))
 }
 
-func ScpPut(h *Host, localPath, remotePath string) error {
-	client, err := NewSftpClient(h)
+func ScpPut(h *Host, cfg ssh.Config, localPath, remotePath string) error {
+	client, err := NewSftpClient(h, cfg)
 	if err != nil {
 		return err
 	}
@@ -100,8 +101,8 @@ func putDirectory(client *sftp.Client, localPath, remotePath string) error {
 	return nil
 }
 
-func ScpGet(h *Host, localPath, remotePath string) error {
-	client, err := NewSftpClient(h)
+func ScpGet(h *Host, cfg ssh.Config, localPath, remotePath string) error {
+	client, err := NewSftpClient(h, cfg)
 	if err != nil {
 		return err
 	}

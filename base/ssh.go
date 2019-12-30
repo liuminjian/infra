@@ -15,9 +15,10 @@ import (
 	"time"
 )
 
-func NewSSHClient(h *Host) (*ssh.Client, error) {
+func NewSSHClient(h *Host, cfg ssh.Config) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
-		User: h.User,
+		Config: cfg,
+		User:   h.User,
 		HostKeyCallback: func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 			return nil
 		},

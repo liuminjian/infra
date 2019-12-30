@@ -1,7 +1,9 @@
 package base
 
-func RunCmd(h *Host, cmd string, envs ...EnvMap) (output string, err error) {
-	conn, err := NewSSHClient(h)
+import "golang.org/x/crypto/ssh"
+
+func RunCmd(h *Host, cfg ssh.Config, cmd string, envs ...EnvMap) (output string, err error) {
+	conn, err := NewSSHClient(h, cfg)
 	defer conn.Close()
 	if err != nil {
 		return
@@ -10,8 +12,8 @@ func RunCmd(h *Host, cmd string, envs ...EnvMap) (output string, err error) {
 	return
 }
 
-func RunSudoCmd(h *Host, cmd string, envs ...EnvMap) (output string, err error) {
-	conn, err := NewSSHClient(h)
+func RunSudoCmd(h *Host, cfg ssh.Config, cmd string, envs ...EnvMap) (output string, err error) {
+	conn, err := NewSSHClient(h, cfg)
 	defer conn.Close()
 	if err != nil {
 		return
@@ -21,8 +23,8 @@ func RunSudoCmd(h *Host, cmd string, envs ...EnvMap) (output string, err error) 
 }
 
 //判断文件是否存在
-func FileExist(h *Host, path string) error {
-	client, err := NewSftpClient(h)
+func FileExist(h *Host, cfg ssh.Config, path string) error {
+	client, err := NewSftpClient(h, cfg)
 	defer client.Close()
 	if err != nil {
 		return err
